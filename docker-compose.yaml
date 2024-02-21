@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    ports:
+      - 8098:8080
+  webserver:
+    container_name: PHP-webserver
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+    volumes:
+      - ./php/:/var/www/html
+    ports:
+      - 8099:80
+    depends_on:
+      - mysql-db
+
+  mysql-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: test_database
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3399:3306"
+    command: --init-file /data/application/init.sql
+    volumes:
+        - ./mysql/:/data/application/
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
